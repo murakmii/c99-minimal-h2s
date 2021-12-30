@@ -40,6 +40,12 @@ const (
 	priorityBit = 0x20
 )
 
+// ストリームを閉じ得るなら真を返す
+func (f *frame) isStreamCloser() bool {
+	return ((f.typ == dataFrame || f.typ == headersFrame) &&
+		f.flags.eos()) || f.typ == rstStreamFrame
+}
+
 // フラグ判定のためのビット演算を読みやすくするためのメソッド群
 func (f flags) eos() bool {
 	return f&eosBit > 0

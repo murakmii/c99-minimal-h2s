@@ -229,6 +229,21 @@ func (mp *multiplexer) run() {
 					code := binary.BigEndian.Uint32(f.payload)
 					mp.logger("received RST_STREAM. code=%d", code)
 					mp.streams.close(f.streamID)
+
+				case settingsFrame:
+					params := decodeSettingsParams(f)
+
+					if value, ok := params[headerTableSizeSetting]; ok {
+						mp.indexTable.UpdateAllowedTableSize(int(value))
+					}
+
+					mp.writer.changeSettings(params)
+
+				case windowUpdateFrame:
+					// ペイロードを加算するウィンドウサイズとしてデコードし、
+					// writerコンポーネントに渡す
+					size := int64(binary.BigEndian.Uint32(f.payload))
+					mp.writer.incrWindow(f.streamID, size)
 				}
 			}
 		}

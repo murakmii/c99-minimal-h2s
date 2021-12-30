@@ -78,6 +78,22 @@ func runReader(
 			// 各種フレームタイプについてフィルタ等を行った上で
 			// multiplexerコンポーネントにフレームを渡す。
 			switch f.typ {
+			case dataFrame:
+				window := make([]byte, 4)
+				binary.BigEndian.PutUint32(window, uint32(len(f.payload)))
+
+				// コネクションレベル、ストリームレベルの両方を
+				// DATAフレームのフレームサイズ分だけ増加させる
+				/*writer.write(&frame{
+					typ:     windowUpdateFrame,
+					payload: window,
+				})
+				writer.write(&frame{
+					typ:      windowUpdateFrame,
+					streamID: f.streamID,
+					payload:  window,
+				})*/
+
 			case headersFrame:
 				if !f.flags.eoh() {
 					headerBuf = append(headerBuf, f)
